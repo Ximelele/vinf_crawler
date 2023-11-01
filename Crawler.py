@@ -5,13 +5,14 @@ from urllib.parse import urljoin
 
 class WebCrawler:
 
-    def __init__(self,starting_url, allowed_domain, user_agent, prefix_domain, regex, robots):
+    def __init__(self,starting_url, allowed_domain, user_agent, prefix_domain, regex, robots , helper = None):
         self.starting_url = starting_url
         self.allowed_domain = allowed_domain
         self.user_agent = user_agent
         self.prefix_domain = prefix_domain
         self.regex = regex
         self.robots = robots
+        self.helper = helper
 
     def can_crawl(self, url, user_agent, robots):
         try:
@@ -55,7 +56,10 @@ class WebCrawler:
                 if response.status_code == 200:
                     print(f'Crawling url: {url}')
                     links = re.findall(regex, response.text)
-
+                    if "fandom" in prefix_domain:
+                        for link in links:
+                            print(link)
+                        return
                     # # pozrie sa ci sa nachadza zakladna domena v vyextrahovanom linku
                     modified_links = [prefix_domain + link if not re.search(allowed_domain, link) else link for link in
                                       links]
