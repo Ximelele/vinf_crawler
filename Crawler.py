@@ -44,13 +44,12 @@ class WebCrawler:
             robots = self.robots
         visited_urls = set()  # set aby neboli duplikaty
         to_crawl = [new_url]
-        # prefix_domain = "https://www.dotabuff.com"
+
         while to_crawl:
             url: str = to_crawl.pop()
             if not self.can_crawl(url, user_agent, robots):
                 continue
-            # print('Idzem crawlovat kkt')
-            # return
+
             try:
                 response = requests.get(url, headers=user_agent)
                 if response.status_code == 200:
@@ -58,19 +57,24 @@ class WebCrawler:
                     links = re.findall(regex, response.text)
                     if "fandom" in prefix_domain:
                         for link in links:
-                            print(link)
-                        return
+                            if link not in self.helper:
+                                links.remove(link)
+
+
                     # # pozrie sa ci sa nachadza zakladna domena v vyextrahovanom linku
                     modified_links = [prefix_domain + link if not re.search(allowed_domain, link) else link for link in
                                       links]
-                    # modified_links = soup.find_all('a')
                     for link in modified_links:
-                        # print(link.get('href'))
+
                         if link not in visited_urls and re.search(allowed_domain, link):
-                            # append_to_file(link)
                             visited_urls.add(link)
-                            if not re.search(r'wiki/(Module|Special|File|Template|User)', link):
+                            if "buff" in prefix_domain:
                                 to_crawl.append(link)
+                            else:
+                                for hero_name in self.helper:
+                                    if hero_name in link:
+                                        to_crawl.append(link)
+                                        break
 
                     if "buff" in prefix_domain:
                         file_name = url.replace("https://www.dotabuff.com/", "").replace('/', '_') + '.txt'
