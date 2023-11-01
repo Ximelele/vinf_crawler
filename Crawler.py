@@ -5,13 +5,14 @@ from urllib.parse import urljoin
 
 class WebCrawler:
 
-    def __init__(self,starting_url, allowed_domain, user_agent, prefix_domain, regex, robots):
+    def __init__(self,starting_url, allowed_domain, user_agent, prefix_domain, regex, robots , helper = None):
         self.starting_url = starting_url
         self.allowed_domain = allowed_domain
         self.user_agent = user_agent
         self.prefix_domain = prefix_domain
         self.regex = regex
         self.robots = robots
+        self.helper = helper
 
     def can_crawl(self, url, user_agent, robots):
         try:
@@ -43,30 +44,37 @@ class WebCrawler:
             robots = self.robots
         visited_urls = set()  # set aby neboli duplikaty
         to_crawl = [new_url]
-        # prefix_domain = "https://www.dotabuff.com"
+
         while to_crawl:
             url: str = to_crawl.pop()
             if not self.can_crawl(url, user_agent, robots):
                 continue
-            # print('Idzem crawlovat kkt')
-            # return
+
             try:
                 response = requests.get(url, headers=user_agent)
                 if response.status_code == 200:
                     print(f'Crawling url: {url}')
                     links = re.findall(regex, response.text)
+                    if "fandom" in prefix_domain:
+                        for link in links:
+                            if link not in self.helper:
+                                links.remove(link)
+
 
                     # # pozrie sa ci sa nachadza zakladna domena v vyextrahovanom linku
                     modified_links = [prefix_domain + link if not re.search(allowed_domain, link) else link for link in
                                       links]
-                    # modified_links = soup.find_all('a')
                     for link in modified_links:
-                        # print(link.get('href'))
+
                         if link not in visited_urls and re.search(allowed_domain, link):
-                            # append_to_file(link)
                             visited_urls.add(link)
-                            if not re.search(r'wiki/(Module|Special|File|Template|User)', link):
+                            if "buff" in prefix_domain:
                                 to_crawl.append(link)
+                            else:
+                                for hero_name in self.helper:
+                                    if hero_name in link:
+                                        to_crawl.append(link)
+                                        break
 
                     if "buff" in prefix_domain:
                         file_name = url.replace("https://www.dotabuff.com/", "").replace('/', '_') + '.txt'
@@ -78,5 +86,25 @@ class WebCrawler:
                         file_path = os.path.join("dotafandom/", file_name)
                         with open(file_path, "w") as file:
                             file.write(response.text)
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
+    # this function needs to exist due to design change on website removing counter feature
+    def crawlFandomCounters(self):
+        to_crawl = self.helper
+
+        while to_crawl:
+            base_link : str =  str(to_crawl.pop())
+            url : str = "https://dota2.fandom.com"+base_link+"/Counters"
+            print(url)
+
+            try:
+                response = requests.get(url, headers=self.user_agent)
+                if response.status_code == 200:
+                    print(f'Crawling url fandom counters: {url}')
+                    file_name = url.replace("https://dota2.fandom.com/", "").replace('/', '_') + '.txt'
+                    file_path = os.path.join("dotafandom/", file_name)
+                    with open(file_path, "w") as file:
+                        file.write(response.text)
+
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
