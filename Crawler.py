@@ -88,3 +88,23 @@ class WebCrawler:
                             file.write(response.text)
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
+    # this function needs to exist due to design change on website removing counter feature
+    def crawlFandomCounters(self):
+        to_crawl = self.helper
+
+        while to_crawl:
+            base_link : str =  str(to_crawl.pop())
+            url : str = "https://dota2.fandom.com"+base_link+"/Counters"
+            print(url)
+
+            try:
+                response = requests.get(url, headers=self.user_agent)
+                if response.status_code == 200:
+                    print(f'Crawling url fandom counters: {url}')
+                    file_name = url.replace("https://dota2.fandom.com/", "").replace('/', '_') + '.txt'
+                    file_path = os.path.join("dotafandom/", file_name)
+                    with open(file_path, "w") as file:
+                        file.write(response.text)
+
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
