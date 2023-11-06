@@ -2,10 +2,11 @@ import os
 import requests
 import re
 from urllib.parse import urljoin
+from textCleaner import Cleaner
 
 class WebCrawler:
 
-    def __init__(self,starting_url, allowed_domain, user_agent, prefix_domain, regex, robots , helper = None):
+    def __init__(self, starting_url, allowed_domain, user_agent, prefix_domain, regex, robots, helper = None):
         self.starting_url = starting_url
         self.allowed_domain = allowed_domain
         self.user_agent = user_agent
@@ -13,6 +14,7 @@ class WebCrawler:
         self.regex = regex
         self.robots = robots
         self.helper = helper
+        self.cleaner = Cleaner()
 
     def can_crawl(self, url, user_agent, robots):
         try:
@@ -46,12 +48,12 @@ class WebCrawler:
         to_crawl = [new_url]
 
         while to_crawl:
-            url: str = to_crawl.pop()
+            url: str = str(to_crawl.pop())
             if not self.can_crawl(url, user_agent, robots):
                 continue
 
             try:
-                response = requests.get(url, headers=user_agent)
+                response = requests.get(str(url), headers=user_agent)
                 if response.status_code == 200:
                     print(f'Crawling url: {url}')
                     links = re.findall(regex, response.text)
@@ -72,7 +74,7 @@ class WebCrawler:
                                 to_crawl.append(link)
                             else:
                                 for hero_name in self.helper:
-                                    if hero_name in link:
+                                    if hero_name in link and all(keyword not in link for keyword in ["Damage_Manipulation", "Equipment", "action=history", "Animations"]):
                                         to_crawl.append(link)
                                         break
 
