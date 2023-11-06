@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 dotabuff/
 dotafandom/
 cleaned/
 copy/
 /dotabuff
+=======
+/dotabuff/*
+/dotafandom/*
+/cleaned/*
+/copy/*
+>>>>>>> e2035cf (Added git ignore)
