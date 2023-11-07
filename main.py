@@ -46,4 +46,6 @@ if __name__ == "__main__":
     # web_crawler_fandom.web_crawler()
     # web_crawler_fandom.crawlFandomCounters()
 
-    web_crawler_fandom.cleaner.fandomCounter()
+    # web_crawler_fandom.cleaner.fandomCounter()
+    # web_crawler_fandom.cleaner.fandomLore()
+    web_crawler_fandom.cleaner.fandomBugs()
