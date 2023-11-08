@@ -77,10 +77,28 @@ class Cleaner:
                     for j in matches:
                         content_between_tags.append(re.sub(html_tags_pattern, '', j[0]))
                         content_between_tags_time.append(re.sub(html_tags_pattern, '', j[1]))
-
+                file_path = os.path.join('cleaned/', i)
                 with open(file_path, 'w') as f:
                     for one, two in zip(content_between_tags, content_between_tags_time):
                         f.write(one)
                         f.write('\n')
                         f.write(two)
                         f.write('\n\n')
+
+    def fandomTalents(self):
+        pattern = r'(Hero\sTalents(.*\n){5}</tbody>)'
+        directory = 'dotafandom/'
+        test = os.listdir(directory)
+        for i in test:
+
+            if re.match(r'.*Talents.html$', i):
+                file_path = os.path.join(directory, i)
+                file = self.openFile(file_path)
+                matches = re.search(pattern, file)
+
+                if matches:
+                    html_tags_pattern = r'<[^>]+>'
+                    cleaned_matches = re.sub(r' {1,}', ' ', str(re.sub(html_tags_pattern, ' ', matches.group(1))))
+                file_path = os.path.join('cleaned/', i)
+                with open(file_path, 'w') as f:
+                    f.write(cleaned_matches)
