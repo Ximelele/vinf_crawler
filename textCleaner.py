@@ -102,3 +102,34 @@ class Cleaner:
                 file_path = os.path.join('cleaned/', i)
                 with open(file_path, 'w') as f:
                     f.write(cleaned_matches)
+
+    def fandomChangelog(self):
+        open_pattern = r'<div class="updatetablebody">'
+        close_pattern = r'(</div>\n){4}'
+        directory = 'dotafandom/'
+        test = os.listdir(directory)
+        for i in test:
+
+            if re.match(r'.*Changelogs.html$', i):
+                file_path = os.path.join(directory, i)
+                file = self.openFile(file_path)
+                open_matches = re.finditer(open_pattern, file)
+                close_matches = re.finditer(close_pattern, file)
+
+                extracted_contents = []
+
+                for open_match, close_match in zip(open_matches, close_matches):
+                    start_position = open_match.end()
+                    end_position = close_match.start()
+                    extracted_content = file[start_position:end_position]
+                    extracted_contents.append(extracted_content)
+                html_tags_pattern = r'<[^>]+>'
+                garbage = r'[^\x20-\x7E\r\n]'
+                for index, content in enumerate(extracted_contents):
+                    extracted_contents[index] = re.sub(html_tags_pattern,  '', content)
+                    extracted_contents[index] = re.sub(garbage, ' ', extracted_contents[index])
+
+                file_path = os.path.join('cleaned/', i)
+                with open(file_path, 'w') as f:
+                    for j in extracted_contents:
+                        f.write(j)
