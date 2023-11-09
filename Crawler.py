@@ -74,9 +74,11 @@ class WebCrawler:
                                 to_crawl.append(link)
                             else:
                                 for hero_name in self.helper:
+
                                     if hero_name in link and not re.search(r'Animations|diff|oldid|direction|Dragon%27s_Blood|[f|F]ather|[m|M]other|action|Equipment|Damage_Manipulation|.*#.*|Sounds|Responses|Lanes|Damage', link):
                                         if re.search(r'.*?/.*', link):
                                             to_crawl.append(link)
+
                                         break
 
                     if "buff" in prefix_domain:

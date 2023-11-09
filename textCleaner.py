@@ -2,6 +2,8 @@ import os
 import re
 
 
+
+
 class Cleaner:
     def __init__(self):
         pass
@@ -16,7 +18,9 @@ class Cleaner:
         pattern = r'<[^>]*\sid="Bad_against..."[^>]*>(.*?)<!--'
 
         directory = 'dotafandom/'
+
         test = os.listdir(directory)
+
         for i in test:
             if re.match(r'.*_Counters.html$', i):
                 file_path = os.path.join(directory, i)
@@ -133,3 +137,4 @@ class Cleaner:
                 with open(file_path, 'w') as f:
                     for j in extracted_contents:
                         f.write(j)
+

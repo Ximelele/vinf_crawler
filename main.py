@@ -13,6 +13,8 @@ def fandom_helper() -> set:
             new_name = new_name[1].replace('-', '_').capitalize().split('_')
             new_name[-1] = new_name[-1].capitalize()
             new_name = "/wiki/" + '_'.join(new_name).split('.')[0]
+
+
             links_for_fandom.add(new_name)
     links_for_fandom.remove("/wiki/Natures_Prophet")
     # tvorcovia stranky maju autizmus
@@ -40,6 +42,7 @@ if __name__ == "__main__":
     # web_crawler = Crawler.WebCrawler(starting_url, allowed_domain, user_agent, "https://www.dotabuff.com",
     #                                         regex, "robots2.txt")
     # web_crawler.web_crawler()
+
     web_crawler_fandom = Crawler.WebCrawler(starting_urlFandom, allowed_domainFandom, user_agent,
                                             "https://dota2.fandom.com", regexFandom, "robots.txt", fandom_helper())
     #
