@@ -74,8 +74,11 @@ class WebCrawler:
                                 to_crawl.append(link)
                             else:
                                 for hero_name in self.helper:
-                                    if hero_name in link and all(keyword not in link for keyword in ["Damage_Manipulation", "Equipment", "action=history", "Animations"]):
-                                        to_crawl.append(link)
+
+                                    if hero_name in link and not re.search(r'Animations|diff|oldid|direction|Dragon%27s_Blood|[f|F]ather|[m|M]other|action|Equipment|Damage_Manipulation|.*#.*|Sounds|Responses|Lanes|Damage', link):
+                                        if re.search(r'.*?/.*', link):
+                                            to_crawl.append(link)
+
                                         break
 
                     if "buff" in prefix_domain:
@@ -84,7 +87,7 @@ class WebCrawler:
                         with open(file_path, "w") as file:
                             file.write(response.text)
                     else:
-                        file_name = url.replace("https://dota2.fandom.com/", "").replace('/', '_') + '.txt'
+                        file_name = url.replace("https://dota2.fandom.com/", "").replace('/', '_') + '.html'
                         file_path = os.path.join("dotafandom/", file_name)
                         with open(file_path, "w") as file:
                             file.write(response.text)
@@ -103,7 +106,7 @@ class WebCrawler:
                 response = requests.get(url, headers=self.user_agent)
                 if response.status_code == 200:
                     print(f'Crawling url fandom counters: {url}')
-                    file_name = url.replace("https://dota2.fandom.com/", "").replace('/', '_') + '.txt'
+                    file_name = url.replace("https://dota2.fandom.com/", "").replace('/', '_') + '.html'
                     file_path = os.path.join("dotafandom/", file_name)
                     with open(file_path, "w") as file:
                         file.write(response.text)
