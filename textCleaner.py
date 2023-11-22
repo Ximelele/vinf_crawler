@@ -121,7 +121,7 @@ class Cleaner:
                 close_matches = re.finditer(close_pattern, file)
 
                 extracted_contents = []
-            
+
                 for open_match, close_match in zip(open_matches, close_matches):
                     start_position = open_match.end()
                     end_position = close_match.start()
@@ -134,6 +134,7 @@ class Cleaner:
                     extracted_contents[index] = re.sub(garbage, ' ', extracted_contents[index])
 
                 file_path = os.path.join('cleaned/', i)
+
                 with open(file_path, 'w',encoding="utf-8") as f:
                     for j in extracted_contents:
                         filtered_list = [s for s in j if b'\xd0' not in s.encode('utf-8')]
@@ -171,3 +172,9 @@ class Cleaner:
                     for j in stripped_list:
                         f.writelines(j)
                         f.write('\n')
+
+                with open(file_path, 'w') as f:
+                    for j in extracted_contents:
+                        f.write(j)
+
+
