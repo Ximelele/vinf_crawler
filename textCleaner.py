@@ -134,7 +134,47 @@ class Cleaner:
                     extracted_contents[index] = re.sub(garbage, ' ', extracted_contents[index])
 
                 file_path = os.path.join('cleaned/', i)
+
+                with open(file_path, 'w',encoding="utf-8") as f:
+                    for j in extracted_contents:
+                        filtered_list = [s for s in j if b'\xd0' not in s.encode('utf-8')]
+                        f.write(filtered_list)
+
+    def buffCounter(self):
+        counter_pattern = r'<section class=\"counter-outline\">(.*?<\/section>)'
+        directory = 'dotabuff/'
+        test = os.listdir(directory)
+        #hero data
+        pattern = r'<header>Matchups</header>(.*?</section>)'
+        #title
+        title_pattern = r'<meta property=\"og:title\" content=(.*?)/>'
+        for i in test:
+
+            if re.match(r'.*counters.*$', i):
+                with open(os.path.join(directory, i),'r') as f:
+                    html_content = f.read()
+
+                matches = re.search(pattern, html_content, re.DOTALL)
+                title_match = re.match(r'"([^"]+)"', re.search(title_pattern, html_content, re.DOTALL).group(1))
+                cleaned_words = title_match.group(1).split()
+
+                title = f'{cleaned_words[0]} {cleaned_words[-1]}'
+
+                html_tags_pattern = r'<[^>]+>'
+                html_content_without_tags = re.sub(html_tags_pattern, ' ', matches.group(1))
+                html_content_without_tags  = ''.join(html_content_without_tags.replace("              ",'\n')).replace("  Dis.     ","").splitlines()
+                stripped_list = [s.strip() for s in html_content_without_tags]
+
+                with open(os.path.join('buffcleaned/', i), 'w') as f:
+                    # f.write(title)
+                    f.writelines(title)
+                    f.write('\n')
+                    for j in stripped_list:
+                        f.writelines(j)
+                        f.write('\n')
+
                 with open(file_path, 'w') as f:
                     for j in extracted_contents:
                         f.write(j)
+
 
