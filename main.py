@@ -1,8 +1,43 @@
 import os
-import re
-
 import Crawler
+# import sparkMerge
+import lucene
 
+from java.nio.file import Paths
+from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene.document import Document, Field, FieldType, TextField,StringField
+from org.apache.lucene.index import IndexOptions, IndexWriter, IndexWriterConfig, DirectoryReader, Term
+from org.apache.lucene.queryparser.classic import QueryParser
+from org.apache.lucene.store import MMapDirectory,NIOFSDirectory
+from org.apache.lucene.search import IndexSearcher
+import os
+
+
+
+
+def index_files(root_folder, index_path):
+
+    analyzer = StandardAnalyzer()
+    config = IndexWriterConfig(analyzer)
+    writer = IndexWriter(NIOFSDirectory(Paths.get(index_path)), config)
+    file_dir = os.listdir(root_folder)
+    print(len(file_dir))
+    for file in file_dir:
+
+        doc = Document()
+        
+        doc.add(StringField("path", os.path.join(root_folder, file), Field.Store.YES))
+        with open(os.path.join(root_folder, file), 'r') as f:        
+            content = f.read()
+            doc.add(TextField("content", content, TextField.Store.YES))
+            # doc.add(Field("title", "Abbadon counter",TextField.TYPE_STORED))
+
+            writer.addDocument(doc)
+
+
+
+    writer.commit()
+    writer.close()
 
 def fandom_helper() -> set:
     links_for_fandom = set()
@@ -44,7 +79,7 @@ if __name__ == "__main__":
     # web_crawler.web_crawler()
 
     web_crawler_fandom = Crawler.WebCrawler(starting_urlFandom, allowed_domainFandom, user_agent,
-                                            "https://dota2.fandom.com", regexFandom, "robots.txt", fandom_helper())
+                                            "https://dota2.fandom.com", regexFandom, "robots.txt")
     #
     # web_crawler_fandom.web_crawler()
 
@@ -54,4 +89,51 @@ if __name__ == "__main__":
     # web_crawler_fandom.cleaner.fandomLore()
     # web_crawler_fandom.cleaner.fandomBugs()
     # web_crawler_fandom.cleaner.fandomTalents()
-    web_crawler_fandom.cleaner.fandomChangelog()
+    # web_crawler_fandom.cleaner.fandomChangelog()
+    # web_crawler_fandom.cleaner.buffCounter()
+
+
+root_folder = "/workspaces/VINF_CRAWLER/cleaned/"
+
+
+index_path = "/workspaces/VINF_CRAWLER/index/"
+
+
+lucene.initVM(vmargs=['-Djava.awt.headless=true'])
+# index_files(root_folder, index_path)
+
+
+analyzer = StandardAnalyzer()
+directory = MMapDirectory(Paths.get(index_path))
+searcher = IndexSearcher(DirectoryReader.open(directory))
+searchTerm  = str(input('Search phrase: '))
+term_query = QueryParser("content",analyzer).parse(searchTerm)
+max_results = 100
+top_docs: IndexSearcher = searcher.search(term_query, max_results)
+
+# boolean_query = BooleanQuery.Builder()
+# name_query = QueryParser("name", analyzer).parse("Abaddon")
+# boolean_query.add(name_query, BooleanClause.Occur.MUST)
+
+# production_years_query = QueryParser("category", analyzer).parse("Axe")
+# boolean_query.add(production_years_query, BooleanClause.Occur.MUST)
+
+# results = searcher.search(boolean_query.build(), 1000)
+# # # hits = results.scoreDocs 
+
+
+
+for score_doc in top_docs.scoreDocs:
+    doc_id = score_doc.doc
+    document = searcher.doc(doc_id)
+    print(f"Document ID: {doc_id}, Path: {document.get('path')}")
+    
+docID  = int(input('Select doc: '))
+document = searcher.doc(docID)
+print(f"{document.get('path')}\n{document.get('content')}")
+searcher.getIndexReader().close()
+
+
+
+# sparkMerge.mergeData()
+

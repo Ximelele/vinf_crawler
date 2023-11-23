@@ -15,7 +15,7 @@ class Cleaner:
 
     def fandomCounter(self):
         # fandom counter regex window
-        pattern = r'<[^>]*\sid="Bad_against..."[^>]*>(.*?)<!--'
+        pattern = r'<[^>]*\sid=\"Bad_against...\"[^>]*>(.*?)<!--'
 
         directory = 'dotafandom/'
 
@@ -28,6 +28,8 @@ class Cleaner:
                 matches = re.search(pattern, file, re.DOTALL)
                 if matches:
                     content_between_tags = matches.group(1)
+                else:
+                    continue
                 html_tags_pattern = r'<[^>]+>'
 
                 html_content_without_tags = re.sub(html_tags_pattern, '', content_between_tags)
@@ -165,7 +167,7 @@ class Cleaner:
                 stripped_list = [s.strip() for s in html_content_without_tags]
 
                 with open(os.path.join('buffcleaned/', i), 'w') as f:
-                    # f.write(title)
+
                     f.writelines(title)
                     f.write('\n')
                     for j in stripped_list:
