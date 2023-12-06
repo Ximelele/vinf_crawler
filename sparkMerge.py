@@ -7,7 +7,7 @@ os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
 def mergeData():
-    spark_session = SparkSession.builder.master('local[*]').appName('buffparser').getOrCreate()
+    spark_session = SparkSession.builder.master('local[*]').appName('buffmerge').getOrCreate()
     
     directory = '/workspaces/VINF_CRAWLER/buffcleaned/'
     test = os.listdir(directory)
