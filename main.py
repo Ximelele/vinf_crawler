@@ -139,7 +139,10 @@ if __name__ == "__main__":
     # web_crawler.web_crawler()
 
     web_crawler_fandom = Crawler.WebCrawler(starting_urlFandom, allowed_domainFandom, user_agent,
-                                            "https://dota2.fandom.com", regexFandom, "robots.txt")
+
+                                            "https://dota2.fandom.com", regexFandom, "robots.txt", fandom_helper())
+
+    
     #
     # web_crawler_fandom.web_crawler()
 
@@ -149,6 +152,7 @@ if __name__ == "__main__":
     # web_crawler_fandom.cleaner.fandomLore()
     # web_crawler_fandom.cleaner.fandomBugs()
     # web_crawler_fandom.cleaner.fandomTalents()
+
     # web_crawler_fandom.cleaner.fandomChangelog()
     # web_crawler_fandom.cleaner.buffCounter()
 
@@ -201,4 +205,5 @@ unittest.main()
 
 
 # sparkMerge.mergeData()
+
 
