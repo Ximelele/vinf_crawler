@@ -15,21 +15,6 @@ import os
 
 import unittest
 
-# def test_upper(self):
-#         self.assertEqual('foo'.upper(), 'FOO')
-
-#     def test_isupper(self):
-#         self.assertTrue('FOO'.isupper())
-#         self.assertFalse('Foo'.isupper())
-
-#     def test_split(self):
-#         s = 'hello world'
-#         self.assertEqual(s.split(), ['hello', 'world'])
-#         # check that s.split fails when the separator is not a string
-#         with self.assertRaises(TypeError):
-#             s.split(2)
-import unittest
-
 class TestSearchQuery(unittest.TestCase):
     
     def setUp(self):
@@ -77,7 +62,7 @@ def index_files(root_folder, index_path):
     config = IndexWriterConfig(analyzer)
     writer = IndexWriter(NIOFSDirectory(Paths.get(index_path)), config)
     file_dir = os.listdir(root_folder)
-    print(len(file_dir))
+
     for file in file_dir:
 
         doc = Document()
@@ -86,11 +71,8 @@ def index_files(root_folder, index_path):
         with open(os.path.join(root_folder, file), 'r') as f:        
             content = f.read()
             doc.add(TextField("content", content, TextField.Store.YES))
-            # doc.add(Field("title", "Abbadon counter",TextField.TYPE_STORED))
 
             writer.addDocument(doc)
-
-
 
     writer.commit()
     writer.close()
@@ -104,10 +86,8 @@ def fandom_helper() -> set:
             new_name = new_name[1].replace('-', '_').capitalize().split('_')
             new_name[-1] = new_name[-1].capitalize()
             new_name = "/wiki/" + '_'.join(new_name).split('.')[0]
-
-
-
             links_for_fandom.add(new_name)
+            
     links_for_fandom.remove("/wiki/Natures_Prophet")
     # tvorcovia stranky maju autizmus
     links_for_fandom.add("/wiki/Nature%27s_Prophet")
@@ -122,50 +102,8 @@ def boolQuery():
     print(test_query)
 
 if __name__ == "__main__":
-    starting_urlFandom = 'https://dota2.fandom.com'
-    starting_url = 'https://www.dotabuff.com/heroes'
-
-    allowed_domainFandom = r'dota2\.fandom\.com/wiki/.*'
-    allowed_domain = r'^https://www\.dotabuff\.com/heroes/'
-    user_agent = {'User-Agent': "School project on STU FIIT for information retrival (xdruzbacky@stuba.sk)"}
-
-    # # najde vsetko co obsahuje wiki
-    # dotafandom
-    regexFandom = r'<a[^>]*\s+href=["\'](.*?wiki/.*?)["\'][^>]*>'
-    # dotabuff
-    regex = r'<a[^>]*\s+href=["\'](.*?heroes/.*?)["\'][^>]*>'
-
-    # web_crawler = Crawler.WebCrawler(starting_url, allowed_domain, user_agent, "https://www.dotabuff.com",
-    #                                         regex, "robots2.txt")
-    # web_crawler.web_crawler()
-
-    web_crawler_fandom = Crawler.WebCrawler(starting_urlFandom, allowed_domainFandom, user_agent,
-
-
-                                            "https://dota2.fandom.com", regexFandom, "robots.txt", fandom_helper())
-
-    #
-    # web_crawler_fandom.web_crawler()
-
-    # web_crawler_fandom.crawlFandomCounters()
-
-    # web_crawler_fandom.cleaner.fandomCounter()
-    # web_crawler_fandom.cleaner.fandomLore()
-    # web_crawler_fandom.cleaner.fandomBugs()
-    # web_crawler_fandom.cleaner.fandomTalents()
-
-    # web_crawler_fandom.cleaner.fandomChangelog()
-
-    # web_crawler_fandom.cleaner.fandomChangelog()
-    # web_crawler_fandom.cleaner.buffCounter()
-
-
 root_folder = "/workspaces/VINF_CRAWLER/cleaned/"
-
-
 index_path = "/workspaces/VINF_CRAWLER/index/"
-
-
 lucene.initVM(vmargs=['-Djava.awt.headless=true'])
 # index_files(root_folder, index_path)
 
