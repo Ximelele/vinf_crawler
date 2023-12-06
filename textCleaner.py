@@ -17,7 +17,6 @@ class Cleaner:
         return html_content
 
     def fandomCounter(self):
-        # fandom counter regex window
         pattern = r'<[^>]*\sid=\"Bad_against...\"[^>]*>(.*?)<!--'
 
         directory = 'dotafandom/'
@@ -78,7 +77,6 @@ class Cleaner:
 
             if re.match(r'.*Bugs.html$', i):
                 file_path = os.path.join(directory, i)
-                # file_path = 'dotafandom/wiki_Abaddon_Bugs.html'
                 file = self.openFile(file_path)
                 matches = re.findall(pattern, file)
 
