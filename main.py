@@ -1,6 +1,7 @@
 import os
 import Crawler
 # import sparkMerge
+import re
 import lucene
 
 
@@ -10,7 +11,7 @@ from org.apache.lucene.document import Document, Field, FieldType, TextField, St
 from org.apache.lucene.index import IndexOptions, IndexWriter, IndexWriterConfig, DirectoryReader, Term
 from org.apache.lucene.queryparser.classic import QueryParser
 from org.apache.lucene.store import MMapDirectory, NIOFSDirectory
-from org.apache.lucene.search import IndexSearcher
+from org.apache.lucene.search import IndexSearcher, BooleanQuery, BooleanClause
 import os
 
 import unittest
@@ -59,6 +60,38 @@ class TestSearchQuery(unittest.TestCase):
         doc_id = top_docs[0].doc
         self.assertNotEqual(doc_id, 363)
 
+    def test_right_input_correct_doc_bool(self):
+        print(f"Running test: {self.current_test_name}")
+        analyzer = StandardAnalyzer()
+        directory = MMapDirectory(Paths.get(index_path))
+        searcher = IndexSearcher(DirectoryReader.open(directory))
+        boolean_query = BooleanQuery.Builder()
+
+        name_query = QueryParser("content", analyzer).parse('Slark')
+        boolean_query.add(name_query, BooleanClause.Occur.MUST)
+        name_query = QueryParser("content", analyzer).parse('Disadvantage')
+        boolean_query.add(name_query, BooleanClause.Occur.MUST)
+
+        top_docs = searcher.search(boolean_query.build(), 20).scoreDocs
+        doc_id = top_docs[0].doc
+        self.assertEqual(doc_id, 509)
+
+    def test_right_input_wrong_doc_bool(self):
+        print(f"Running test: {self.current_test_name}")
+        analyzer = StandardAnalyzer()
+        directory = MMapDirectory(Paths.get(index_path))
+        searcher = IndexSearcher(DirectoryReader.open(directory))
+        boolean_query = BooleanQuery.Builder()
+
+        name_query = QueryParser("content", analyzer).parse('Axe')
+        boolean_query.add(name_query, BooleanClause.Occur.MUST)
+        name_query = QueryParser("content", analyzer).parse('Disadvantage')
+        boolean_query.add(name_query, BooleanClause.Occur.MUST)
+
+        top_docs = searcher.search(boolean_query.build(), 20).scoreDocs
+        doc_id = top_docs[0].doc
+        self.assertNotEqual(doc_id, 345)
+
 
 def index_files(root_folder, index_path):
 
@@ -103,11 +136,90 @@ def fandom_helper() -> set:
     return links_for_fandom
 
 
-def boolQuery():
-    test_query = "Axe AND Doom AND Brewmaster NOT Chen"
+def single_query():
+    analyzer = StandardAnalyzer()
+    directory = MMapDirectory(Paths.get(index_path))
+    searcher = IndexSearcher(DirectoryReader.open(directory))
 
-    test_query = test_query.split('AND')
-    print(test_query)
+    searchTerm = str(input('Search phrase: '))
+    term_query = QueryParser("content", analyzer).parse(searchTerm)
+    max_results = 20
+    top_docs: IndexSearcher = searcher.search(term_query, max_results)
+
+    print("[%s] = total matching documents." % len(top_docs.scoreDocs))
+    for score_doc in top_docs.scoreDocs:
+        doc_id = score_doc.doc
+        document = searcher.doc(doc_id)
+        print(f"Score: {score_doc.score} Document ID: {
+              doc_id}, Path: {document.get('path')}")
+
+    docID = int(input('Select doc: '))
+    document = searcher.doc(docID)
+    print(f"{document.get('path')}\n{document.get('content')}")
+    searcher.getIndexReader().close()
+
+
+def add_AND(builder, AND_list, analyzer):
+    for i in AND_list[0]:
+        name_query = QueryParser("content", analyzer).parse(i)
+        builder.add(name_query, BooleanClause.Occur.MUST)
+
+
+def add_NOT(builder, NOT_list, analyzer):
+    if len(NOT_list) == 1:
+        for i in NOT_list:
+            name_query = QueryParser("content", analyzer).parse(i)
+            builder.add(name_query, BooleanClause.Occur.MUST_NOT)
+
+
+def boolean_query_search():
+    boolean_query_hint()
+    analyzer = StandardAnalyzer()
+    directory = MMapDirectory(Paths.get(index_path))
+    searcher = IndexSearcher(DirectoryReader.open(directory))
+    boolean_query = BooleanQuery.Builder()
+    boolstring = searchTerm = str(input('Search phrase: '))
+    find_AND = re.findall(r'(\S+)\sAND\s(\S+)', boolstring)
+    find_NOT = re.findall(r'NOT\s(\S+\s\S+|\S+)', boolstring)
+    if find_AND:
+        for i in find_AND[0]:
+            print(i)
+            name_query = QueryParser("content", analyzer).parse(i)
+            boolean_query.add(name_query, BooleanClause.Occur.MUST)
+    if find_NOT:
+        for i in find_NOT:
+            name_query = QueryParser("content", analyzer).parse(i)
+            boolean_query.add(name_query, BooleanClause.Occur.MUST_NOT)
+    print(find_AND)
+    print(find_NOT)
+    top_docs = searcher.search(boolean_query.build(), 20)
+    print("[%s] = total matching documents." % len(top_docs.scoreDocs))
+    for score_doc in top_docs.scoreDocs:
+        doc_id = score_doc.doc
+        document = searcher.doc(doc_id)
+        print(f"Score: {score_doc.score} Document ID: {
+              doc_id}, Path: {document.get('path')}")
+
+    docID = int(input('Select doc: '))
+    document = searcher.doc(docID)
+    print(f"{document.get('path')}\n{document.get('content')}")
+    searcher.getIndexReader().close()
+
+
+def menu():
+    print(f"""
+    Press 1 for unit tests (Restart required)
+    Press 2 for single query
+    Press 3 for boolean query
+    Press 4 for end
+          """)
+
+
+def boolean_query_hint():
+    print(f"""
+    Chaining interaction
+    Example: Axe AND Abaddon NOT Disadvantage
+    """)
 
 
 if __name__ == "__main__":
@@ -115,39 +227,17 @@ if __name__ == "__main__":
     index_path = "/workspaces/VINF_CRAWLER/index/"
     lucene.initVM(vmargs=['-Djava.awt.headless=true'])
     # index_files(root_folder, index_path)
-    # end = False
 
-    # boolQuery()
-    # while not end:
-    # analyzer = StandardAnalyzer()
-    unittest.main()
-    # directory = MMapDirectory(Paths.get(index_path))
-    # searcher = IndexSearcher(DirectoryReader.open(directory))
-    # searchTerm  = str(input('Search phrase: '))
-    # term_query = QueryParser("content",analyzer).parse(searchTerm)
-    # max_results = 20
-    # top_docs: IndexSearcher = searcher.search(term_query, max_results)
-
-    # # boolean_query = BooleanQuery.Builder()
-    # # name_query = QueryParser("name", analyzer).parse("Abaddon")
-    # # boolean_query.add(name_query, BooleanClause.Occur.MUST)
-
-    # # multiple_heroes = QueryParser("category", analyzer).parse("Axe")
-    # # boolean_query.add(multiple_heroes, BooleanClause.Occur.MUST)
-
-    # # results = searcher.search(boolean_query.build(), 1000)
-    # # # # hits = results.scoreDocs
-
-    # print("[%s] = total matching documents." % len(top_docs.scoreDocs))
-
-    # for score_doc in top_docs.scoreDocs:
-    #     doc_id = score_doc.doc
-    #     document = searcher.doc(doc_id)
-    #     print(f"Score: {score_doc.score} Document ID: {doc_id}, Path: {document.get('path')}")
-
-    # docID  = int(input('Select doc: '))
-    # document = searcher.doc(docID)
-    # print(f"{document.get('path')}\n{document.get('content')}")
-    # searcher.getIndexReader().close()
+    while True:
+        menu()
+        user_input = int(input())
+        if user_input == 1:
+            unittest.main()
+        elif user_input == 2:
+            single_query()
+        elif user_input == 3:
+            boolean_query_search()
+        elif user_input == 4:
+            break
 
     # sparkMerge.mergeData()
