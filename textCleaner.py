@@ -2,11 +2,6 @@ import os
 import re
 
 
-
-
-
-
-
 class Cleaner:
     def __init__(self):
         pass
@@ -23,7 +18,6 @@ class Cleaner:
 
         test = os.listdir(directory)
 
-
         test = os.listdir(directory)
 
         for i in test:
@@ -37,7 +31,8 @@ class Cleaner:
                     continue
                 html_tags_pattern = r'<[^>]+>'
 
-                html_content_without_tags = re.sub(html_tags_pattern, '', content_between_tags)
+                html_content_without_tags = re.sub(
+                    html_tags_pattern, '', content_between_tags)
 
                 file_path = os.path.join('cleaned/', i)
                 html_content_without_tags = html_content_without_tags.splitlines()
@@ -60,7 +55,8 @@ class Cleaner:
                     content_between_tags = matches.group(1)
                 html_tags_pattern = r'<[^>]+>'
 
-                html_content_without_tags = re.sub(html_tags_pattern, '', content_between_tags)
+                html_content_without_tags = re.sub(
+                    html_tags_pattern, '', content_between_tags)
                 file_path = os.path.join('cleaned/', i)
                 html_content_without_tags = html_content_without_tags.splitlines()
                 hero_sections = [i.strip() for i in html_content_without_tags]
@@ -85,8 +81,10 @@ class Cleaner:
                     content_between_tags: list = []
                     content_between_tags_time: list = []
                     for j in matches:
-                        content_between_tags.append(re.sub(html_tags_pattern, '', j[0]))
-                        content_between_tags_time.append(re.sub(html_tags_pattern, '', j[1]))
+                        content_between_tags.append(
+                            re.sub(html_tags_pattern, '', j[0]))
+                        content_between_tags_time.append(
+                            re.sub(html_tags_pattern, '', j[1]))
                 file_path = os.path.join('cleaned/', i)
                 with open(file_path, 'w') as f:
                     for one, two in zip(content_between_tags, content_between_tags_time):
@@ -108,7 +106,8 @@ class Cleaner:
 
                 if matches:
                     html_tags_pattern = r'<[^>]+>'
-                    cleaned_matches = re.sub(r' {1,}', ' ', str(re.sub(html_tags_pattern, ' ', matches.group(1))))
+                    cleaned_matches = re.sub(r' {1,}', ' ', str(
+                        re.sub(html_tags_pattern, ' ', matches.group(1))))
                 file_path = os.path.join('cleaned/', i)
                 with open(file_path, 'w') as f:
                     f.write(cleaned_matches)
@@ -136,39 +135,45 @@ class Cleaner:
                 html_tags_pattern = r'<[^>]+>'
                 garbage = r'[^\x20-\x7E\r\n]'
                 for index, content in enumerate(extracted_contents):
-                    extracted_contents[index] = re.sub(html_tags_pattern,  '', content)
-                    extracted_contents[index] = re.sub(garbage, ' ', extracted_contents[index])
+                    extracted_contents[index] = re.sub(
+                        html_tags_pattern,  '', content)
+                    extracted_contents[index] = re.sub(
+                        garbage, ' ', extracted_contents[index])
 
                 file_path = os.path.join('cleaned/', i)
 
-                with open(file_path, 'w',encoding="utf-8") as f:
+                with open(file_path, 'w', encoding="utf-8") as f:
                     for j in extracted_contents:
-                        filtered_list = [s for s in j if b'\xd0' not in s.encode('utf-8')]
+                        filtered_list = [
+                            s for s in j if b'\xd0' not in s.encode('utf-8')]
                         f.write(filtered_list)
 
     def buffCounter(self):
         counter_pattern = r'<section class=\"counter-outline\">(.*?<\/section>)'
         directory = 'dotabuff/'
         test = os.listdir(directory)
-        #hero data
+        # hero data
         pattern = r'<header>Matchups</header>(.*?</section>)'
-        #title
+        # title
         title_pattern = r'<meta property=\"og:title\" content=(.*?)/>'
         for i in test:
 
             if re.match(r'.*counters.*$', i):
-                with open(os.path.join(directory, i),'r') as f:
+                with open(os.path.join(directory, i), 'r') as f:
                     html_content = f.read()
 
                 matches = re.search(pattern, html_content, re.DOTALL)
-                title_match = re.match(r'"([^"]+)"', re.search(title_pattern, html_content, re.DOTALL).group(1))
+                title_match = re.match(
+                    r'"([^"]+)"', re.search(title_pattern, html_content, re.DOTALL).group(1))
                 cleaned_words = title_match.group(1).split()
 
                 title = f'{cleaned_words[0]} {cleaned_words[-1]}'
 
                 html_tags_pattern = r'<[^>]+>'
-                html_content_without_tags = re.sub(html_tags_pattern, ' ', matches.group(1))
-                html_content_without_tags  = ''.join(html_content_without_tags.replace("              ",'\n')).replace("  Dis.     ","").splitlines()
+                html_content_without_tags = re.sub(
+                    html_tags_pattern, ' ', matches.group(1))
+                html_content_without_tags = ''.join(html_content_without_tags.replace(
+                    "              ", '\n')).replace("  Dis.     ", "").splitlines()
                 stripped_list = [s.strip() for s in html_content_without_tags]
 
                 with open(os.path.join('buffcleaned/', i), 'w') as f:
