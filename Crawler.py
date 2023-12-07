@@ -6,7 +6,7 @@ from textCleaner import Cleaner
 
 
 class WebCrawler:
-
+    # Setting up default parameters for crawling
     def __init__(self, starting_url, allowed_domain, user_agent, prefix_domain, regex, robots, helper=None):
         self.starting_url = starting_url
         self.allowed_domain = allowed_domain
@@ -16,6 +16,7 @@ class WebCrawler:
         self.robots = robots
         self.helper = helper
         self.cleaner = Cleaner()
+    # Function to check if crawling is allowed on current urlß
 
     def can_crawl(self, url, user_agent, robots):
         try:
@@ -45,7 +46,8 @@ class WebCrawler:
             prefix_domain = self.prefix_domain
             regex = self.regex
             robots = self.robots
-        visited_urls = set()  # set aby neboli duplikaty
+
+        visited_urls = set()
         to_crawl = [new_url]
 
         while to_crawl:
@@ -63,7 +65,7 @@ class WebCrawler:
                             if link not in self.helper:
                                 links.remove(link)
 
-                    # # pozrie sa ci sa nachadza zakladna domena v vyextrahovanom linku
+                    # Check is base domain is in extracted link
                     modified_links = [prefix_domain + link if not re.search(allowed_domain, link) else link for link in
                                       links]
                     for link in modified_links:
@@ -74,13 +76,13 @@ class WebCrawler:
                                 to_crawl.append(link)
                             else:
                                 for hero_name in self.helper:
-
+                                    # Avoiding unwanted names in link
                                     if hero_name in link and not re.search(r'Animations|diff|oldid|direction|Dragon%27s_Blood|[f|F]ather|[m|M]other|action|Equipment|Damage_Manipulation|.*#.*|Sounds|Responses|Lanes|Damage', link):
                                         if re.search(r'.*?/.*', link):
                                             to_crawl.append(link)
 
                                         break
-
+                    # Saving crawled files
                     if "buff" in prefix_domain:
                         file_name = url.replace(
                             "https://www.dotabuff.com/", "").replace('/', '_') + '.txt'
@@ -95,8 +97,8 @@ class WebCrawler:
                             file.write(response.text)
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
-    # this function needs to exist due to design change on website removing counter feature
 
+    # this function needs to exist due to design change on website removing counter feature
     def crawlFandomCounters(self):
         to_crawl = self.helper
 
